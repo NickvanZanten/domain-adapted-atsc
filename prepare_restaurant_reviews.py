@@ -2,6 +2,7 @@ import json
 from tqdm import tqdm
 import spacy
 import argparse
+import gzip
 
 parser = argparse.ArgumentParser(description='Generate finetuning corpus for restaurants.')
 
@@ -18,11 +19,11 @@ if args.large:
 
 nlp = spacy.load('en_core_web_sm')
 nlp.add_pipe(nlp.create_pipe('sentencizer'))
-fn = 'data/raw/review.json'
+fn = 'data/raw/review.json.gz'
 reviews = []
 
 # 4 million reviews to generate about minimum 10 mio sentences
-with open(fn) as data_file:
+with gzip.open(fn) as data_file:
     counter = 0
     for line in data_file:
         counter += 1
