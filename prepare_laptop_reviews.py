@@ -74,8 +74,8 @@ fn_out = f'data/transformed/laptop_corpus_{nr_sents}.txt'
 
 # filter sentences by appearance in the semeval dataset
 
-sents_semeval_train, _, _ = semeval2014term_to_aspectsentiment_hr("data/raw/semeval2014/SemEval-2014 ABSA Test Data - Gold Annotations/ABSA_Gold_TestData/Laptops_Test_Gold.xml")
-sents_semeval_test, _, _ = semeval2014term_to_aspectsentiment_hr("data/raw/semeval2014/SemEval-2014 ABSA Train Data v2.0 & Annotation Guidelines/Laptop_Train_v2.xml")
+sents_semeval_train, _, _ = semeval2014term_to_aspectsentiment_hr("data/raw/semeval2014/ABSA_Gold_TestData/Laptops_Test_Gold.xml")
+sents_semeval_test, _, _ = semeval2014term_to_aspectsentiment_hr("data/raw/semeval2014/SemEval'14-ABSA-TrainData_v2 & AnnotationGuidelines/Laptop_Train_v2.xml")
 sents_all = set(sents_semeval_train + sents_semeval_test)
 
 removed_reviews_count = 0
