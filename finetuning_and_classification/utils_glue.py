@@ -270,6 +270,98 @@ class SemEval2014AtscProcessor(DataProcessor):
         return examples
 
 
+def semeval2016category_to_aspectsentiment_hr(filename, remove_conflicting=True):
+    sentimap = {
+        'positive': 'POS',
+        'negative': 'NEG',
+        'neutral': 'NEU',
+        'conflict': 'CONF',
+    }
+
+    def transform_aspect_category_name(se):
+        return se
+
+    with open(filename) as file:
+
+        sentence_elements = ET.parse(file).getroot().iter('sentence')
+
+        sentences = []
+        aspect_term_sentiments = []
+        classes = set([])
+
+        for j, s in enumerate(sentence_elements):
+            # review_text = ' '.join([el.text for el in review_element.iter('text')])
+
+            sentence_text = s.find('text').text
+            aspect_term_sentiment = []
+            for o in s.iter('Opinion'):
+                aspect_term = transform_aspect_category_name(o.get('category'))
+                classes.add(aspect_term)
+                sentiment = sentimap[o.get('polarity')]
+                if sentiment != 'CONF':
+                    aspect_term_sentiment.append((aspect_term, sentiment))
+                else:
+                    if remove_conflicting:
+                        pass
+                        # print('Conflicting Term found! Removed!')
+                    else:
+                        aspect_term_sentiment.append((aspect_term, sentiment))
+
+            if len(aspect_term_sentiment) > 0:
+                aspect_term_sentiments.append(aspect_term_sentiment)
+                sentences.append(sentence_text)
+
+        cats = list(classes)
+        cats.sort()
+
+    idx2aspectlabel = {k: v for k, v in enumerate(cats)}
+    sentilabel2idx = {"NEG": 1, "NEU": 2, "POS": 3, "CONF": 4}
+    idx2sentilabel = {k: v for v, k in sentilabel2idx.items()}
+
+    return sentences, aspect_term_sentiments, (idx2aspectlabel, idx2sentilabel)
+
+
+class SemEval2016AcscProcessor(DataProcessor):
+    """Processor for the Aspect-target sentiment Task of Semeval 2016 Task 5 Subtask 2"""
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            os.path.join(data_dir, "train.xml"), "train")
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            os.path.join(data_dir, "test.xml"), "dev")
+
+    def get_labels(self):
+        """See base class."""
+        return ["POS", "NEG", "NEU"]
+
+    def _create_examples(self, corpus, set_type):
+        """Creates examples for the training and dev sets."""
+
+
+        texts, aspects, idx2labels = semeval2016category_to_aspectsentiment_hr(corpus, remove_conflicting=True)
+
+        sentences, labels = generate_qa_sentence_pairs_nosampling(texts, aspects)
+
+        examples = []
+
+        for i, sentence_pair in enumerate(sentences):
+
+            guid = "%s-%s" % (set_type, i)
+            try:
+                text_a = sentence_pair[0]
+                text_b = sentence_pair[1]
+                label = labels[i]
+            except IndexError:
+                continue
+            examples.append(
+                InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
+        return examples
+
+
 class ColaProcessor(DataProcessor):
     """Processor for the CoLA data set (GLUE version)."""
 
@@ -328,6 +420,7 @@ class Sst2Processor(DataProcessor):
             examples.append(
                 InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
         return examples
+
 
 
 class StsbProcessor(DataProcessor):
@@ -684,6 +777,8 @@ def compute_metrics(task_name, preds, labels, sentences=None, error_file=None):
         return {"acc": simple_accuracy(preds, labels)}
     elif task_name == "semeval2014-atsc":
         return acc_and_f1macro(preds, labels)
+    elif task_name == "semeval2016-acsc":
+        return acc_and_f1macro(preds, labels)
     else:
         raise KeyError(task_name)
 
@@ -699,6 +794,7 @@ processors = {
     "rte": RteProcessor,
     "wnli": WnliProcessor,
     "semeval2014-atsc":SemEval2014AtscProcessor,
+    "semeval2016-acsc":SemEval2016AcscProcessor,
 }
 
 output_modes = {
