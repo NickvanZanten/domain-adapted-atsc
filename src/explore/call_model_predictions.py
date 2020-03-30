@@ -5,12 +5,13 @@ from __future__ import absolute_import, division, print_function
 import argparse
 import os
 import logging
-from finetuning_and_classification.run_glue import MODEL_CLASSES, ALL_MODELS, processors
+from src.finetuning_and_classification.run_glue import MODEL_CLASSES, ALL_MODELS, processors
 import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-def main():
+if __name__ == "__main__":
+    print("Start main")
     parser = argparse.ArgumentParser()
 
     ## Required parameters
@@ -43,3 +44,7 @@ def main():
 
     # Set data for predictions
     logger.info("Loading examples from dataset file at %s", args.data_file)
+
+    # Predict for the given data file
+    pred = model("From the build quality to the performance, everything about it has been sub-par from what I would have expected from Apple.")
+    print(pred)
