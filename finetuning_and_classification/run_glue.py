@@ -25,18 +25,15 @@ import random
 
 import numpy as np
 import torch
-from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
-                              TensorDataset)
+from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler, TensorDataset)
 from torch.utils.data.distributed import DistributedSampler
 from tensorboardX import SummaryWriter
 from tqdm import tqdm, trange
 
-from pytorch_transformers import (WEIGHTS_NAME, BertConfig,
-                                  BertForSequenceClassification, BertTokenizer,
-                                  XLMConfig, XLMForSequenceClassification,
-                                  XLMTokenizer, XLNetConfig,
-                                  XLNetForSequenceClassification,
-                                  XLNetTokenizer)
+from pytorch_transformers import (WEIGHTS_NAME, 
+                                  BertConfig, BertForSequenceClassification, BertTokenizer,
+                                  XLMConfig, XLMForSequenceClassification, XLMTokenizer, 
+                                  XLNetConfig, XLNetForSequenceClassification, XLNetTokenizer)
 
 from pytorch_transformers import AdamW, WarmupLinearSchedule
 
@@ -255,21 +252,21 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False):
         logger.info("Loading features from cached file %s", cached_features_file)
 
         # tmp code for writing out the textual error analysis; comment for training!
-        label_list = processor.get_labels()
-        examples = processor.get_dev_examples(args.data_dir) if evaluate else processor.get_train_examples(
-            args.data_dir)
-        features, tokenized_examples = convert_examples_to_features(examples, label_list, args.max_seq_length,
-                                                                    tokenizer, output_mode,
-                                                                    cls_token_at_end=bool(args.model_type in ['xlnet']),
-                                                                    # xlnet has a cls token at the end
-                                                                    cls_token=tokenizer.cls_token,
-                                                                    sep_token=tokenizer.sep_token,
-                                                                    cls_token_segment_id=2 if args.model_type in [
-                                                                        'xlnet'] else 1,
-                                                                    pad_on_left=bool(args.model_type in ['xlnet']),
-                                                                    # pad on the left for xlnet
-                                                                    pad_token_segment_id=4 if args.model_type in [
-                                                                        'xlnet'] else 0)
+        # label_list = processor.get_labels()
+        # examples = processor.get_dev_examples(args.data_dir) if evaluate else processor.get_train_examples(
+        #     args.data_dir)
+        # features, tokenized_examples = convert_examples_to_features(examples, label_list, args.max_seq_length,
+        #                                                             tokenizer, output_mode,
+        #                                                             cls_token_at_end=bool(args.model_type in ['xlnet']),
+        #                                                             # xlnet has a cls token at the end
+        #                                                             cls_token=tokenizer.cls_token,
+        #                                                             sep_token=tokenizer.sep_token,
+        #                                                             cls_token_segment_id=2 if args.model_type in [
+        #                                                                 'xlnet'] else 1,
+        #                                                             pad_on_left=bool(args.model_type in ['xlnet']),
+        #                                                             # pad on the left for xlnet
+        #                                                             pad_token_segment_id=4 if args.model_type in [
+        #                                                                 'xlnet'] else 0)
 
         # end tmp
         # features = torch.load(cached_features_file)
