@@ -134,7 +134,7 @@ def upsample_data(sentence_pairs, labels, target_ratios={'POS': 0.53, 'NEG': 0.2
     print(n, math.floor(m))
 
     examples_to_add = {k: math.floor(target_ratios[k] * m - len(ix_subsets[k])) for k in t_keys}
-    print(examples_to_add)  # so we need to add more neutral examples and more positiev ones
+    print(examples_to_add)  # so we need to add more neutral examples and more positive ones
 
     # downsampling would be set 0 the maximum amount of negative ones
 
