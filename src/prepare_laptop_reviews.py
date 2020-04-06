@@ -5,8 +5,8 @@ from tqdm import tqdm
 from utils import semeval2014term_to_aspectsentiment_hr
 
 # path to files
-fn = 'data/raw/reviews_Electronics.json.gz'
-fn_meta = 'data/raw/meta_Electronics.json.gz'
+fn = '../data/raw/reviews_Electronics.json.gz'
+fn_meta = '../data/raw/meta_Electronics.json.gz'
 
 nlp = spacy.load('en_core_web_sm')
 nlp.add_pipe(nlp.create_pipe('sentencizer'))
@@ -70,12 +70,12 @@ print(f'Segmented {nr_sents} laptop sentences')
 
 # Save to file
 max_sentences = int(25e6)
-fn_out = f'data/transformed/laptop_corpus_{nr_sents}.txt'
+fn_out = f'../data/transformed/laptop_corpus_{nr_sents}.txt'
 
 # filter sentences by appearance in the semeval dataset
 
-sents_semeval_train, _, _ = semeval2014term_to_aspectsentiment_hr("data/raw/semeval2014/ABSA_Gold_TestData/Laptops_Test_Gold.xml")
-sents_semeval_test, _, _ = semeval2014term_to_aspectsentiment_hr("data/raw/semeval2014/SemEval'14-ABSA-TrainData_v2 & AnnotationGuidelines/Laptop_Train_v2.xml")
+sents_semeval_train, _, _ = semeval2014term_to_aspectsentiment_hr("../data/raw/semeval2014/ABSA_Gold_TestData/Laptops_Test_Gold.xml")
+sents_semeval_test, _, _ = semeval2014term_to_aspectsentiment_hr("../data/raw/semeval2014/SemEval'14-ABSA-TrainData_v2 & AnnotationGuidelines/Laptop_Train_v2.xml")
 sents_all = set(sents_semeval_train + sents_semeval_test)
 
 removed_reviews_count = 0
