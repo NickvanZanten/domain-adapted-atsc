@@ -273,3 +273,5 @@ dmypy.json
 
 .vscode/*
 .vscode
+
+scr/finetuning_and_classification/runs/
