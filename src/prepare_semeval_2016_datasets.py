@@ -163,8 +163,8 @@ def upsample_data(sentence_pairs, labels, target_ratios={'POS': 0.53, 'NEG': 0.2
 
 
 def export_dataset_to_xml(fn, sentence_pairs, labels):
-    # export in format semeval 2016, incomplete though! just for loading with existing dataloaders for ATSC
-    sentences_el = ET.Element('sentences')
+    # export in format semeval 2016, incomplete though! just for loading with existing dataloaders for ACSC
+    sentences_el = ET.Element('Reviews')
     sentimap_reverse = {
         'POS': 'positive',
         'NEU': 'neutral',
@@ -234,14 +234,14 @@ for fn in args.files:
         os.makedirs(args.output_dir)
 
     print(fn)
-    sents_train, ats_train, idx2labels = semeval2016category_to_aspectsentiment_hr(fn,
+    sents_train, acs_train, idx2labels = semeval2016category_to_aspectsentiment_hr(fn,
                                                                                remove_conflicting=args.noconfl)
 
-    sentence_pairs_train, labels_train, counts_train = create_sentence_pairs(sents_train, ats_train)
+    sentence_pairs_train, labels_train, counts_train = create_sentence_pairs(sents_train, acs_train)
 
     if args.istrain:
         sents_dev, sents_trainsplit = split_shuffle_array(.1, sents_train, 41)
-        ats_dev, ats_trainsplit = split_shuffle_array(.1, ats_train, 41)
+        ats_dev, ats_trainsplit = split_shuffle_array(.1, acs_train, 41)
 
         sentence_pairs_dev, labels_dev, counts_dev = create_sentence_pairs(sents_dev, ats_dev)
         sentence_pairs_trainsplit, labels_trainsplit, counts_trainsplit = create_sentence_pairs(sents_trainsplit,
