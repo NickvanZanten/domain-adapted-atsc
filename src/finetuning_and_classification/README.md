@@ -14,9 +14,9 @@ The LM finetuning code is an adaption to a script from the huggingface/pytorch-t
 Prepare the finetuning corpus, here shown for a test corpus "dev_corpus.txt":
 
     python pregenerate_training_data.py \
-    --train_corpus dev_corpus.txt \
+    --train_corpus ../../data/raw/dev_corpus.txt \
     --bert_model bert-base-uncased --do_lower_case \
-    --output_dir dev_corpus_prepared/ \
+    --output_dir ../../data/transformed/dev_corpus_prepared/ \
     --epochs_to_generate 2 --max_seq_len 256
 
 
@@ -27,6 +27,8 @@ Run actual finetuning with:
     --bert_model bert-base-uncased --do_lower_case \
     --output_dir dev_corpus_finetuned/ \
     --epochs 2 --train_batch_size 16
+
+If you run into memory issues: RuntimeError: CUDA out of memory. Then consider decreasing the batch_size from 16 to 8.
     
 ## Downstream Classification
 
@@ -51,5 +53,9 @@ Restaurants dataset, use the command below:
     --output_dir=../data/models/semeval2014-atsc-bert-ada-restaurants-restaurants \
     --max_seq_length=128 --learning_rate 3e-5 --per_gpu_eval_batch_size=32 --per_gpu_train_batch_size=32 \
     --gradient_accumulation_steps=1 --max_steps=800 --overwrite_output_dir --overwrite_cache --warmup_steps=120 --fp16
+
+    OR
+
+    python3 run_glue.py --model_type bert --model_name_or_path ../../data/models/banking_corpus_finetuned --do_train --evaluate_during_training --do_eval --logging_steps 100 --save_steps 1200 --task_name=semeval2016-acsc --seed 42 --do_lower_case --data_dir=../../data/transformed/verbatims_annotated_prepared --output_dir=../../data/models/semeval2016-acsc-bert-ada-banking-acsc-banking --max_seq_length=128 --learning_rate 3e-5 --per_gpu_eval_batch_size=32 --per_gpu_train_batch_size=32 --gradient_accumulation_steps=1 --max_steps=800 --overwrite_output_dir --overwrite_cache --warmup_steps=120 --fp16
 
 In addition, if memory usage is an issue, especially when training on a single GPU, reducing --train_batch_size from the default 32 to a lower number (4-16) can be helpful, or leaving --train_batch_size at the default and increasing --gradient_accumulation_steps to 2-8. Changing --gradient_accumulation_steps may be preferable as alterations to the batch size may require corresponding changes in the learning rate to compensate. There is also a --reduce_memory option for both the pregenerate_training_data.py and finetune_on_pregenerated.py scripts that spills data to disc in shelf objects or numpy memmaps rather than retaining it in memory, which significantly reduces memory usage with little performance impact.

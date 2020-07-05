@@ -4,10 +4,10 @@ import xml.etree.ElementTree as ET
 import random
 import math
 from collections import Counter
-from utils import npsverbatim_to_aspectsentiment_hr
+from utils import semeval2016subtask2_category_to_aspectsentiment_hr
 from copy import copy, deepcopy
 
-parser = argparse.ArgumentParser(description='Generate finetuning corpus for NPS annotated data.')
+parser = argparse.ArgumentParser(description='Generate finetuning corpus for restaurants.')
 
 parser.add_argument('--noconfl',
                     action='store_true',
@@ -80,7 +80,7 @@ def create_sentence_pairs(sents, aspect_term_sentiments):
 
 def print_dataset_stats(name, sents, sent_pairs, counts):
     print('Dataset:', name)
-    print('#Sentences with minimum 1 label', len(sents))
+    print('#Reviews with minimum 1 label', len(sents))
     print('Label Counts', counts.most_common())
     print('#SentencePairs', len(sent_pairs))
     print('POS%', counts['POS'] / len(sent_pairs))
@@ -161,9 +161,10 @@ def upsample_data(sentence_pairs, labels, target_ratios={'POS': 0.53, 'NEG': 0.2
 
     return new_sentence_pairs, new_labels
 
+
 def export_dataset_to_xml(fn, sentence_pairs, labels):
     # export in format semeval 2016, incomplete though! just for loading with existing dataloaders for ACSC
-    sentences_el = ET.Element('sentences')
+    sentences_el = ET.Element('Reviews')
     sentimap_reverse = {
         'POS': 'positive',
         'NEU': 'neutral',
@@ -171,19 +172,20 @@ def export_dataset_to_xml(fn, sentence_pairs, labels):
         'CONF': 'conflict'
     }
 
-    for ix, (sentence, aspectcategory) in enumerate(sentence_pairs):
+    for ix, (sentence, aspectterm) in enumerate(sentence_pairs):
         # print(sentence)
         sentiment = labels[ix]
         sentence_el = ET.SubElement(sentences_el, 'sentence')
         sentence_el.set('id', str(ix))
         text = ET.SubElement(sentence_el, 'text')
         text.text = str(sentence).strip()
+        aspect_terms_el = ET.SubElement(sentence_el, 'aspectTerms')
 
-        aspect_category_el = ET.SubElement(aspect_categories_el, 'aspectCategory')
-        aspect_category_el.set('category', aspectcategory)
-        aspect_category_el.set('polarity', sentimap_reverse[sentiment])
-        aspect_category_el.set('from', str('0'))
-        aspect_category_el.set('to', str('0'))
+        aspect_term_el = ET.SubElement(aspect_terms_el, 'aspectTerm')
+        aspect_term_el.set('term', aspectterm)
+        aspect_term_el.set('polarity', sentimap_reverse[sentiment])
+        aspect_term_el.set('from', str('0'))
+        aspect_term_el.set('to', str('0'))
 
     def indent(elem, level=0):
         i = "\n" + level * "  "
@@ -232,10 +234,8 @@ for fn in args.files:
         os.makedirs(args.output_dir)
 
     print(fn)
-    sents_train, acs_train, idx2labels = npsverbatim_to_aspectsentiment_hr(fn, remove_conflicting=args.noconfl)
-
-    print(len(sents_train))
-    print(len(acs_train))
+    sents_train, acs_train, idx2labels = semeval2016subtask2_category_to_aspectsentiment_hr(fn,
+                                                                               remove_conflicting=args.noconfl)
 
     sentence_pairs_train, labels_train, counts_train = create_sentence_pairs(sents_train, acs_train)
 

@@ -22,6 +22,7 @@ import logging
 import os
 import sys
 from io import open
+import pandas as pd
 
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import matthews_corrcoef, f1_score
@@ -249,7 +250,6 @@ class SemEval2014AtscProcessor(DataProcessor):
     def _create_examples(self, corpus, set_type):
         """Creates examples for the training and dev sets."""
 
-
         sentences, aspects, idx2labels = semeval2014term_to_aspectsentiment_hr(corpus, remove_conflicting=True)
 
         sentences, labels = generate_qa_sentence_pairs_nosampling(sentences, aspects)
@@ -278,7 +278,7 @@ def semeval2016category_to_aspectsentiment_hr(filename, remove_conflicting=True)
         'conflict': 'CONF',
     }
 
-    def transform_aspect_category_name(se):
+    def transform_aspect_term_name(se):
         return se
 
     with open(filename) as file:
@@ -294,8 +294,8 @@ def semeval2016category_to_aspectsentiment_hr(filename, remove_conflicting=True)
 
             sentence_text = s.find('text').text
             aspect_term_sentiment = []
-            for o in s.iter('Opinion'):
-                aspect_term = transform_aspect_category_name(o.get('category'))
+            for o in s.iter('aspectCategory'):
+                aspect_term = transform_aspect_term_name(o.get('category'))
                 classes.add(aspect_term)
                 sentiment = sentimap[o.get('polarity')]
                 if sentiment != 'CONF':
@@ -319,7 +319,6 @@ def semeval2016category_to_aspectsentiment_hr(filename, remove_conflicting=True)
     idx2sentilabel = {k: v for v, k in sentilabel2idx.items()}
 
     return sentences, aspect_term_sentiments, (idx2aspectlabel, idx2sentilabel)
-
 
 class SemEval2016AcscProcessor(DataProcessor):
     """Processor for the Aspect-target sentiment Task of Semeval 2016 Task 5 Subtask 2"""
@@ -603,6 +602,9 @@ def convert_examples_to_features(examples, label_list, max_seq_length,
 
     label_map = {label : i for i, label in enumerate(label_list)}
 
+    print("###### LABEL MAP ######")
+    print(label_map)
+
     features = []
     tokenized_examples = []
     for (ex_index, example) in enumerate(examples):
@@ -778,6 +780,8 @@ def compute_metrics(task_name, preds, labels, sentences=None, error_file=None):
     elif task_name == "semeval2014-atsc":
         return acc_and_f1macro(preds, labels)
     elif task_name == "semeval2016-acsc":
+        print(preds)
+        print(labels)
         return acc_and_f1macro(preds, labels)
     else:
         raise KeyError(task_name)
@@ -809,6 +813,7 @@ output_modes = {
     "rte": "classification",
     "wnli": "classification",
     "semeval2014-atsc":"classification",
+    "semeval2016-acsc":"classification",
 }
 
 GLUE_TASKS_NUM_LABELS = {
@@ -822,4 +827,5 @@ GLUE_TASKS_NUM_LABELS = {
     "rte": 2,
     "wnli": 2,
     "semeval2014-atsc":3,
+    "semeval2016-acsc":3,
 }

@@ -179,6 +179,8 @@ def export_dataset_to_xml(fn, sentence_pairs, labels):
         sentence_el.set('id', str(ix))
         text = ET.SubElement(sentence_el, 'text')
         text.text = str(sentence).strip()
+        aspect_categories_el = ET.SubElement(sentence_el, 'aspectCategories')
+
         aspect_terms_el = ET.SubElement(sentence_el, 'aspectTerms')
 
         aspect_term_el = ET.SubElement(aspect_terms_el, 'aspectTerm')

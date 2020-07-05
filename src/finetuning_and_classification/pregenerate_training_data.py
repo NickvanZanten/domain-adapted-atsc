@@ -7,6 +7,7 @@ from multiprocessing import Pool
 
 from random import random, randrange, randint, shuffle, choice
 from pytorch_transformers.tokenization_bert import BertTokenizer
+from pytorch_transformers.tokenization_roberta import RobertaTokenizer
 import numpy as np
 import json
 import collections
@@ -293,7 +294,7 @@ def main():
     parser.add_argument("--output_dir", type=Path, required=True)
     parser.add_argument("--bert_model", type=str, required=True,
                         choices=["bert-base-uncased", "bert-large-uncased", "bert-base-cased",
-                                 "bert-base-multilingual-uncased", "bert-base-chinese", "bert-base-multilingual-cased"])
+                                 "bert-base-multilingual-uncased", "bert-base-chinese", "bert-base-multilingual-cased", "roberta-base"])
     parser.add_argument("--do_lower_case", action="store_true")
     parser.add_argument("--do_whole_word_mask", action="store_true",
                         help="Whether to use whole word masking rather than per-WordPiece masking.")
@@ -317,7 +318,10 @@ def main():
     if args.num_workers > 1 and args.reduce_memory:
         raise ValueError("Cannot use multiple workers while reducing memory")
 
-    tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
+    if args.bert_model == 'roberta-base':
+        tokenizer = RobertaTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
+    else:
+        tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
     vocab_list = list(tokenizer.vocab.keys())
     with DocumentDatabase(reduce_memory=args.reduce_memory) as docs:
         with args.train_corpus.open() as f:

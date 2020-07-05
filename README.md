@@ -1,8 +1,4 @@
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/adapt-or-get-left-behind-domain-adaptation/aspect-based-sentiment-analysis-on-semeval)](https://paperswithcode.com/sota/aspect-based-sentiment-analysis-on-semeval?p=adapt-or-get-left-behind-domain-adaptation)
-
-# Adapt or Get Left Behind: Domain Adaptation through BERT Language Model Finetuning for Aspect-Target Sentiment Classification
-code for our 2019 paper: ["Adapt or Get Left Behind:
-Domain Adaptation through BERT Language Model Finetuning for Aspect-Target Sentiment Classification"](https://arxiv.org/abs/1908.11860)
+# Cross-domain behavior analysis Language Model Finetuning for Aspect-Based Sentiment Analysis
 
 ### Installation
 First clone repository, open a terminal and cd to the repository
@@ -12,6 +8,7 @@ First clone repository, open a terminal and cd to the repository
     pip install -r requirements.txt
     python -m spacy download en_core_web_sm
     mkdir -p data/raw/semeval2014  # creates directories for data
+    mkdir -p data/raw/semeval2016
     mkdir -p data/transformed
     mkdir -p data/models
     
@@ -30,7 +27,7 @@ is compatible with torch 1.1.0 ). You can also perform downstream finetuning wit
     
 ### Preparing data for BERT Language Model Finetuning
 
-We make use of two publicly available research datasets
+This repository makes use of two publicly available research datasets
 for the domains laptops and restaurants:
 
 * Amazon electronics reviews and metadata for filtering laptop reviews only:
@@ -80,10 +77,10 @@ Laptops
     --output_dir data/transformed/laptops_noconfl \
     --istrain \
     --noconfl
-    
-    python prepare_semeval_datasets.py \
-    --files "data/raw/semeval2014/SemEval-2014 ABSA Test Data - Gold Annotations/ABSA_Gold_TestData/Laptops_Test_Gold.xml" \
-    --output_dir data/transformed/laptops_noconfl \
+
+    python prepare_semeval_2014_datasets.py \
+    --files "../data/raw/semeval2014/ABSA_Gold_TestData/Laptops_Test_Gold.xml" \
+    --output_dir ../data/transformed/semeval2014_laptops_noconfl \
     --noconfl
     
 Restaurants
@@ -92,6 +89,20 @@ Restaurants
     python prepare_semeval_datasets.py \
     --files "data/raw/semeval2014/SemEval-2014 ABSA Train Data v2.0 & Annotation Guidelines/Restaurants_Train_v2.xml" \
     --output_dir data/transformed/restaurants_noconfl \
+    --istrain \
+    --noconfl
+    
+    python prepare_semeval_2014_datasets.py \
+    --files "../data/raw/semeval2014/ABSA_Gold_TestData/Restaurants_Test_Gold.xml" \
+    --output_dir ../data/transformed/semeval2014_restaurants_noconfl \          
+    --noconfl
+
+NPS Verbatims
+
+    # Verbatims without conflict label
+    python prepare_verbatim_datasets.py \
+    --files "data/raw/semeval2016/NPS_Verbatim_train.jsonl" \
+    --output_dir data/transformed/NPS_verbatim_noconfl \
     --istrain \
     --noconfl
     
@@ -114,50 +125,7 @@ Mixed
     "data/raw/semeval2014/SemEval-2014 ABSA Test Data - Gold Annotations/ABSA_Gold_TestData/Laptops_Test_Gold.xml" \
     --output_dir data/transformed/mixed_noconfl --noconfl
 
-New: Upsampling training data for ablation study checking the influence of the labeldistribution on end-performance:
-
-Laptops 
-
-    # Laptop-upsampled->test:
-
-    python prepare_semeval_datasets.py \
-    --files "data/raw/semeval2014/SemEval-2014 ABSA Train Data v2.0 & Annotation Guidelines/Laptop_Train_v2.xml" \
-    --output_dir data/transformed/laptops_noconfl_uptest \
-    --istrain \
-    --noconfl --upsample "0.534 0.201 0.265" --seed 41
-    
-    python prepare_semeval_datasets.py \
-    --files "data/raw/semeval2014/SemEval-2014 ABSA Test Data - Gold Annotations/ABSA_Gold_TestData/Laptops_Test_Gold.xml" \
-    --output_dir data/transformed/laptops_noconfl_uptest \
-    --noconfl
-
-Restaurants
-
-    # Restaurants-upsampled->test:
-
-    python prepare_semeval_datasets.py \
-    --files "data/raw/semeval2014/SemEval-2014 ABSA Train Data v2.0 & Annotation Guidelines/Restaurants_Train_v2.xml" \
-    --output_dir data/transformed/restaurants_noconfl_uptest \
-    --istrain \
-    --noconfl --upsample "0.650 0.175 0.175" --seed 41
-    
-    python prepare_semeval_datasets.py \
-    --files "data/raw/semeval2014/SemEval-2014 ABSA Test Data - Gold Annotations/ABSA_Gold_TestData/Restaurants_Test_Gold.xml" \
-    --output_dir data/transformed/restaurants_noconfl_uptest \
-    --noconfl
-
-## Release of BERT language models finetuned on a specific domain
-
-* [BERT-ADA Laptops](https://drive.google.com/file/d/1I2hOyi120Fwn2cApfVwjaOw782IGjWS8/view?usp=sharing)
-* [BERT-ADA Restaurants](https://drive.google.com/file/d/1DmVrhKQx74p1U5c7oq6qCTVxGIpgvp1c/view?usp=sharing)
-* [BERT-ADA Joint (Restaurant + Laptops)](https://drive.google.com/file/d/1LqscXdlzKxx7XPPcWXRGRwgM8agnH4kM/view?usp=sharing)
-
-The models should be compatible with the [huggingface/pytorch-transformers](https://github.com/huggingface/pytorch-transformers) module version > 1.0.
-The models are compressed with tar.xz and need to be decompressed before usage.
-
-
 ## BERT Language Model Finetuning
-
 
 Check the README in the "finetuning_and_classification" folder for how to finetune the BERT models
 on a domain specific corpus.
@@ -166,14 +134,3 @@ on a domain specific corpus.
 
 Check the README in the "finetuning_and_classification" folder for how to train the BERT-ADA models
 on the downstream task.
-
-## Citation
-
-If you use this work, please cite our paper using the following Bibtex tag:
-
-    @article{rietzler2019adapt,
-       title={Adapt or Get Left Behind: Domain Adaptation through BERT Language Model Finetuning for Aspect-Target Sentiment Classification},
-       author={Rietzler, Alexander and Stabinger, Sebastian and Opitz, Paul and Engl, Stefan},
-       journal={arXiv preprint arXiv:1908.11860},
-       year={2019}
-    }

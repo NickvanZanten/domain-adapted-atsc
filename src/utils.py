@@ -104,7 +104,63 @@ def semeval2016category_to_aspectsentiment_hr(filename, remove_conflicting=True)
     sentilabel2idx = {"NEG": 1, "NEU": 2, "POS": 3, "CONF": 4}
     idx2sentilabel = {k: v for v, k in sentilabel2idx.items()}
 
+    print("#######")
+    print(idx2aspectlabel)
+
     return sentences, aspect_category_sentiments, (idx2aspectlabel, idx2sentilabel)
+
+def semeval2016subtask2_category_to_aspectsentiment_hr(filename, remove_conflicting=True):
+    sentimap = {
+        'positive': 'POS',
+        'negative': 'NEG',
+        'neutral': 'NEU',
+        'conflict': 'CONF',
+    }
+
+    def transform_aspect_category_name(se):
+        return se
+
+    with open(filename) as file:
+
+        review_elements = ET.parse(file).getroot().iter('Review')
+        
+        sentences = []
+        aspect_category_sentiments = []
+        classes = set([])
+
+        for j, s in enumerate(review_elements):
+            review_text = ' '.join([el.find('text').text for el in s.iter('sentence')])
+            
+            aspect_category_sentiment = []
+            for o in s.iter('Opinion'):
+                aspect_category = transform_aspect_category_name(o.get('category'))
+                classes.add(aspect_category)
+                sentiment = sentimap[o.get('polarity')]
+                if sentiment != 'CONF':
+                    aspect_category_sentiment.append((aspect_category, sentiment))
+                else:
+                    if remove_conflicting:
+                        pass
+                        # print('Conflicting Term found! Removed!')
+                    else:
+                        aspect_category_sentiment.append((aspect_category, sentiment))
+
+            if len(aspect_category_sentiment) > 0:
+                aspect_category_sentiments.append(aspect_category_sentiment)
+                sentences.append(review_text)
+
+        cats = list(classes)
+        cats.sort()
+
+    idx2aspectlabel = {k: v for k, v in enumerate(cats)}
+    sentilabel2idx = {"NEG": 1, "NEU": 2, "POS": 3, "CONF": 4}
+    idx2sentilabel = {k: v for v, k in sentilabel2idx.items()}
+
+    print("#######")
+    print(idx2aspectlabel)
+
+    return sentences, aspect_category_sentiments, (idx2aspectlabel, idx2sentilabel)
+
 
 def npsverbatim_to_aspectsentiment_hr(filename, remove_conflicting=True):
     sentimap = {
@@ -154,5 +210,8 @@ def npsverbatim_to_aspectsentiment_hr(filename, remove_conflicting=True):
     idx2aspectlabel = {k: v for k, v in enumerate(cats)}
     sentilabel2idx = {"NEG": 1, "NEU": 2, "POS": 3, "CONF": 4}
     idx2sentilabel = {k: v for v, k in sentilabel2idx.items()}
+
+    print("#######")
+    print(idx2aspectlabel)
 
     return texts, aspect_category_sentiments, (idx2aspectlabel, idx2sentilabel)
